@@ -1,1 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090909">
+  <title>CKET — Rewards Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="CKET home"><span class="brand-mark">C</span><span>CKET</span></a>
+      <div class="top-actions">
+        <span class="status-pill"><i></i> MEMBER AREA</span>
+        <button id="logoutBtn" class="text-button hidden" type="button">Log out</button>
+      </div>
+    </header>
 
+    <section id="authView" class="auth-layout">
+      <div class="hero-copy">
+        <p class="eyebrow">THE REWARDS EXPERIENCE</p>
+        <h1>Make every<br><em>moment</em> count.</h1>
+        <p class="hero-sub">A modern rewards and activity platform. Create an account to explore your personal CKET space.</p>
+        <div class="hero-stats">
+          <div><strong>30</strong><span>CKETs for eligible activities</span></div>
+          <div><strong>1</strong><span>Personal rewards dashboard</span></div>
+        </div>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-heading">
+          <span class="mini-mark">C</span>
+          <p class="eyebrow">WELCOME TO CKET</p>
+          <h2 id="authTitle">Create your account</h2>
+          <p id="authDescription">Join the experience in a few simple steps.</p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Account access">
+          <button class="tab active" id="signupTab" type="button">Sign up</button>
+          <button class="tab" id="loginTab" type="button">Log in</button>
+        </div>
+        <form id="authForm">
+          <div id="nameField" class="field">
+            <label for="fullName">Full name</label>
+            <input id="fullName" name="fullName" type="text" placeholder="Enter your name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="contact">Phone number or email</label>
+            <input id="contact" name="contact" type="text" placeholder="e.g. name@email.com" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required>
+          </div>
+          <div id="confirmField" class="field">
+            <label for="confirmPassword">Confirm password</label>
+            <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Enter password again" autocomplete="new-password" minlength="8" required>
+          </div>
+          <p id="authMessage" class="message" aria-live="polite"></p>
+          <button class="gold-button full-button" type="submit"><span id="submitLabel">Create account</span><b>→</b></button>
+        </form>
+        <p class="security-note"><span>◆</span> This version stores account data in this browser. Use a secure backend before public launch.</p>
+      </div>
+    </section>
+
+    <section id="dashboardView" class="dashboard hidden">
+      <div class="welcome-row">
+        <div><p class="eyebrow">YOUR PERSONAL SPACE</p><h1>Welcome back, <span id="userName">Member</span>.</h1><p class="muted">Your CKET experience starts here.</p></div>
+        <div class="avatar" id="avatar">M</div>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="balance-card">
+          <div class="balance-top"><span class="eyebrow">CKET WALLET</span><span class="wallet-icon">◇</span></div>
+          <div class="balance-number"><strong id="balance">0</strong><span>CKET</span></div>
+          <div class="naira-line"><strong id="nairaEstimate">₦0</strong><span>indicative points equivalent</span></div>
+          <p class="balance-caption">Illustrative calculation only. Not cash, not redeemable, and not withdrawable.</p>
+          <div class="balance-line"></div>
+          <div class="balance-bottom"><span>Account holder</span><strong id="accountHolder">Member</strong></div>
+        </article>
+        <article class="notice-card">
+          <span class="notice-icon">✦</span>
+          <p class="eyebrow">A NOTE FROM CKET</p>
+          <h3>Consistency deserves recognition.</h3>
+          <p>Explore CKET activities and simulated features. CKET points have no cash value and cannot be exchanged for money.</p>
+        </article>
+      </div>
+
+      <div class="section-heading"><div><p class="eyebrow">EXPLORE</p><h2>Your dashboard</h2></div><span class="section-tag">CKET FEATURES</span></div>
+      <div class="feature-grid">
+        <article class="feature-card"><div class="feature-icon">▣</div><h3>Activity rewards</h3><p>Complete the available activity and collect virtual CKET points.</p><button class="outline-button" id="adDemoBtn" type="button">Claim activity <span>→</span></button></article>
+        <article class="feature-card"><div class="feature-icon">↗</div><h3>CKET market</h3><p>Watch a simulated market move and practise with virtual points only.</p><button class="outline-button" id="marketBtn" type="button">Open market <span>→</span></button></article>
+        <article class="feature-card"><div class="feature-icon">✧</div><h3>Spin &amp; rewards</h3><p>Explore the rewards area and see available fixed-value activities.</p><button class="outline-button" id="spinBtn" type="button">Explore rewards <span>→</span></button></article>
+        <article class="feature-card"><div class="feature-icon">🎁</div><h3>Redeem a code</h3><p>Redeem a sample code for virtual CKET points.</p><button class="outline-button" id="redeemBtn" type="button">Open code box <span>→</span></button></article>
+      </div>
+
+      <div class="feature-grid secondary-grid">
+        <article class="feature-card"><div class="feature-icon">＋</div><h3>Deposit</h3><p>View the deposit information screen. No payment is collected.</p><button class="outline-button" id="depositBtn" type="button">View deposit <span>→</span></button></article>
+        <article class="feature-card"><div class="feature-icon">↙</div><h3>Withdraw</h3><p>Withdrawals are currently unavailable. No bank details are requested.</p><button class="outline-button" id="withdrawBtn" type="button">View status <span>→</span></button></article>
+      </div>
+
+      <div class="bottom-grid">
+        <article class="activity-card"><div class="section-heading compact"><div><p class="eyebrow">LATEST UPDATES</p><h2>Activity</h2></div><span class="live-dot">● ACTIVE</span></div><div id="activityList" class="activity-list"><div class="empty-state">Your activity will appear here.</div></div></article>
+        <article class="account-card"><p class="eyebrow">ACCOUNT DETAILS</p><h2>Your profile</h2><div class="profile-row"><span>Name</span><strong id="profileName">—</strong></div><div class="profile-row"><span>Login ID</span><strong id="profileContact">—</strong></div><div class="profile-row"><span>Account type</span><strong>Local browser account</strong></div><p class="tiny-note">This version stores account data on this device only. It is not secure production authentication and does not sync across devices.</p></article>
+      </div>
+      <footer>© <span id="year"></span> CKET. Virtual points and simulated features only. No payment or payout processing.</footer>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="featureDialog" class="feature-dialog">
+    <button class="dialog-close" id="dialogClose" aria-label="Close" type="button">×</button>
+    <div id="dialogContent">
+      <p class="eyebrow">CKET</p><h2 id="dialogTitle">Information</h2><p id="dialogText">Feature information appears here.</p>
+    </div>
+    <button class="gold-button" id="dialogOk" type="button">Close</button>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>
