@@ -4,251 +4,205 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080808">
-  <title>CKET | Dashboard</title>
+  <title>CKET | Digital Wallet</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="app">
+  <!-- AUTHENTICATION -->
+  <section id="authView" class="auth-view">
+    <div class="auth-card">
+      <div class="logo">C<span>KET</span></div>
+      <p class="subtitle">Your digital rewards wallet</p>
 
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-mark">C</span>
-      <span>CKET</span>
+      <div class="auth-tabs">
+        <button id="showLogin" class="active">Log In</button>
+        <button id="showSignup">Sign Up</button>
+      </div>
+
+      <form id="loginForm">
+        <h2>Welcome Back</h2>
+        <input id="loginEmail" type="email" placeholder="Email address" required>
+        <input id="loginPassword" type="password" placeholder="Password" required>
+        <button type="submit" class="gold-btn">Log In</button>
+        <p id="loginMessage" class="message"></p>
+      </form>
+
+      <form id="signupForm" hidden>
+        <h2>Create Account</h2>
+        <input id="signupName" type="text" placeholder="Full name" required>
+        <input id="signupEmail" type="email" placeholder="Email address" required>
+        <input id="signupPassword" type="password" placeholder="Create password" minlength="6" required>
+        <button type="submit" class="gold-btn">Create Account</button>
+        <p id="signupMessage" class="message"></p>
+      </form>
     </div>
-    <button class="profile-btn" id="profileBtn">C</button>
-  </header>
+  </section>
 
-  <main>
+  <!-- MAIN APP -->
+  <section id="appView" hidden>
 
-    <!-- LARGE BALANCE DASHBOARD -->
-    <section class="balance-card">
-      <div class="watermark">C</div>
-
-      <div class="balance-top">
-        <span>MY TOTAL BALANCE</span>
-        <span class="status-dot">● ACTIVE</span>
+    <header class="topbar">
+      <div class="logo">C<span>KET</span></div>
+      <div class="profile-area">
+        <span id="welcomeName">Welcome</span>
+        <button id="logoutBtn" class="logout-btn">Log out</button>
       </div>
+    </header>
 
-      <div class="balance-number">
-        <span id="balanceValue">0</span>
-        <small>CKET</small>
-      </div>
+    <main class="container">
 
-      <div class="naira-balance" id="nairaBalance">₦0.00</div>
-      <div class="balance-caption">Naira equivalent</div>
+      <!-- HOME -->
+      <section id="homePage" class="page active">
+        <div class="balance-card">
+          <div class="watermark">C</div>
+          <p class="balance-label">TOTAL CKET BALANCE</p>
+          <h1><span id="balanceValue">30</span> <small>CKET</small></h1>
+          <p class="naira-label">₦<span id="nairaBalance">3,000</span></p>
+          <p class="balance-note">Your available balance</p>
+        </div>
 
-      <div class="balance-bottom">
-        <span>CKET WALLET</span>
-        <span>ACCOUNT BALANCE</span>
-      </div>
-    </section>
+        <div class="wallet-actions">
+          <button id="depositBtn">
+            <span>＋</span>
+            Deposit
+          </button>
+          <button id="withdrawBtn">
+            <span>↗</span>
+            Withdraw
+          </button>
+          <button id="convertBtn">
+            <span>⇄</span>
+            Convert
+          </button>
+          <button id="adsBtn">
+            <span>▶</span>
+            Earn CKET
+          </button>
+        </div>
 
-    <!-- WALLET ACTIONS -->
-    <section class="wallet-actions">
+        <div class="section-heading">
+          <h2>Overview</h2>
+        </div>
 
-      <button class="wallet-action" id="depositBtn">
-        <span class="action-icon">＋</span>
-        <span>Deposit</span>
+        <div class="overview-card">
+          <div>
+            <p>My CKET</p>
+            <h2><span id="overviewBalance">30</span> CKET</h2>
+            <p>₦<span id="overviewNaira">3,000</span></p>
+          </div>
+          <div class="overview-icon">C</div>
+        </div>
+
+        <div class="section-heading">
+          <h2>Quick Access</h2>
+        </div>
+
+        <div class="quick-grid">
+          <button data-page="spinPage">🎡<span>Spin & Win</span></button>
+          <button data-page="redeemPage">🎁<span>Redeem Code</span></button>
+          <button data-page="activityPage">📋<span>Activity</span></button>
+        </div>
+
+        <div class="section-heading">
+          <h2>Market Preview</h2>
+        </div>
+
+        <div class="market-card">
+          <div>
+            <strong>CKET</strong>
+            <p>Digital rewards balance</p>
+          </div>
+          <strong>₦100 / CKET</strong>
+        </div>
+      </section>
+
+      <!-- SPIN PAGE -->
+      <section id="spinPage" class="page">
+        <div class="page-heading">
+          <h2>Spin & Win</h2>
+          <p>Try your luck and discover your reward.</p>
+        </div>
+
+        <div class="spin-card">
+          <div class="wheel-pointer">▼</div>
+          <div id="wheel" class="wheel">
+            <div class="wheel-label label-one">500</div>
+            <div class="wheel-label label-two">200</div>
+            <div class="wheel-label label-three">-70</div>
+            <div class="wheel-label label-four">Better Luck</div>
+            <div class="wheel-label label-five">10</div>
+            <div class="wheel-label label-six">80</div>
+            <div class="wheel-center">C</div>
+          </div>
+
+          <p class="spin-chances">Free spins available: <span id="spinChances">1</span></p>
+          <button id="spinBtn" class="gold-btn">SPIN NOW</button>
+          <p id="spinMessage" class="message"></p>
+          <p class="small-note">Rewards are part of the CKET demo experience.</p>
+        </div>
+      </section>
+
+      <!-- REDEEM PAGE -->
+      <section id="redeemPage" class="page">
+        <div class="page-heading">
+          <h2>Redeem Code</h2>
+          <p>Enter your reward code below.</p>
+        </div>
+
+        <div class="content-card">
+          <div class="redeem-icon">🎁</div>
+          <input id="codeInput" type="text" placeholder="Enter redeem code">
+          <button id="redeemBtn" class="gold-btn">Redeem Now</button>
+          <p id="redeemMessage" class="message"></p>
+        </div>
+      </section>
+
+      <!-- ACTIVITY PAGE -->
+      <section id="activityPage" class="page">
+        <div class="page-heading">
+          <h2>Recent Activity</h2>
+          <p>Keep track of your CKET transactions.</p>
+        </div>
+
+        <div class="content-card">
+          <div id="activityList">
+            <p class="empty-message">No activity yet.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-page="homePage">
+        <span>⌂</span>Home
       </button>
-
-      <button class="wallet-action" id="withdrawBtn">
-        <span class="action-icon">↗</span>
-        <span>Withdraw</span>
+      <button class="nav-btn" data-page="spinPage">
+        <span>🎡</span>Spin
       </button>
-
-      <button class="wallet-action" id="convertBtn">
-        <span class="action-icon">⇄</span>
-        <span>Convert</span>
+      <button class="nav-btn" data-page="redeemPage">
+        <span>🎁</span>Redeem
       </button>
-
-      <button class="wallet-action" id="adsBtn">
-        <span class="action-icon">▶</span>
-        <span>Watch Ads</span>
+      <button class="nav-btn" data-page="activityPage">
+        <span>▤</span>Activity
       </button>
+    </nav>
 
-    </section>
+  </section>
 
-    <!-- OVERVIEW -->
-    <section class="section-heading">
-      <h2>Overview</h2>
-      <span>YOUR ACCOUNT</span>
-    </section>
-
-    <section class="overview-grid">
-
-      <div class="overview-card">
-        <span>Total CKET</span>
-        <strong id="overviewBalance">0</strong>
-        <small>Available balance</small>
-      </div>
-
-      <div class="overview-card">
-        <span>Naira Value</span>
-        <strong id="overviewNaira">₦0</strong>
-        <small>₦100 per CKET</small>
-      </div>
-
-    </section>
-
-    <!-- SPIN AND WIN -->
-    <section class="section-heading">
-      <h2>Spin & Win</h2>
-      <span>REWARDS</span>
-    </section>
-
-    <section class="panel spin-panel">
-
-      <p class="panel-subtitle">
-        Try your luck and win CKET rewards.
-      </p>
-
-      <div class="wheel-pointer">▼</div>
-
-      <div class="wheel" id="wheel">
-
-        <div class="wheel-label label-one">500<br>CKET</div>
-        <div class="wheel-label label-two">200<br>CKET</div>
-        <div class="wheel-label label-three">-70<br>CKET</div>
-        <div class="wheel-label label-four">BETTER<br>LUCK</div>
-        <div class="wheel-label label-five">10<br>CKET</div>
-        <div class="wheel-label label-six">80<br>CKET</div>
-
-        <div class="wheel-centre">C</div>
-
-      </div>
-
-      <div class="spin-info">
-        <span>Free chances remaining</span>
-        <strong id="spinChances">1</strong>
-      </div>
-
-      <button class="primary-btn full-btn" id="spinBtn">
-        SPIN NOW
-      </button>
-
-      <p class="result-message" id="spinMessage"></p>
-
-    </section>
-
-    <!-- REDEEM CODE -->
-    <section class="section-heading">
-      <h2>Redeem Code</h2>
-      <span>REWARDS</span>
-    </section>
-
-    <section class="panel">
-
-      <p class="panel-subtitle">
-        Enter your reward code below.
-      </p>
-
-      <div class="redeem-row">
-        <input
-          type="text"
-          id="codeInput"
-          placeholder="Enter redeem code"
-        >
-
-        <button class="primary-btn" id="redeemBtn">
-          REDEEM
-        </button>
-      </div>
-
-      <p class="result-message" id="redeemMessage"></p>
-
-    </section>
-
-    <!-- MARKET -->
-    <section class="section-heading">
-      <h2>Market</h2>
-      <span>MARKET OVERVIEW</span>
-    </section>
-
-    <section class="market-grid">
-
-      <div class="market-card">
-        <span>Bitcoin</span>
-        <strong>BTC</strong>
-        <small>Market preview</small>
-      </div>
-
-      <div class="market-card">
-        <span>Ethereum</span>
-        <strong>ETH</strong>
-        <small>Market preview</small>
-      </div>
-
-      <div class="market-card">
-        <span>US Dollar</span>
-        <strong>USD</strong>
-        <small>Market preview</small>
-      </div>
-
-    </section>
-
-    <!-- ACTIVITY -->
-    <section class="section-heading">
-      <h2>Recent Activity</h2>
-      <span>HISTORY</span>
-    </section>
-
-    <section class="panel">
-      <div id="activityList" class="activity-list">
-        <p class="empty-state">No transactions yet.</p>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- BOTTOM NAVIGATION -->
-  <nav class="bottom-nav">
-
-    <button class="nav-item active" data-page="home">
-      <span>⌂</span>
-      Home
-    </button>
-
-    <button class="nav-item" data-page="spin">
-      <span>◎</span>
-      Spin
-    </button>
-
-    <button class="nav-item" data-page="redeem">
-      <span>◇</span>
-      Redeem
-    </button>
-
-    <button class="nav-item" data-page="activity">
-      <span>▤</span>
-      Activity
-    </button>
-
-  </nav>
-
-</div>
-
-<!-- POPUP MODAL -->
-<div class="modal" id="demoModal">
-
-  <div class="modal-box">
-
-    <button class="modal-close" id="modalClose">×</button>
-
-    <h2 id="modalTitle">CKET</h2>
-
-    <div id="modalContent"></div>
-
-    <button class="primary-btn full-btn" id="modalOk">
-      Continue
-    </button>
-
+  <!-- GENERAL MODAL -->
+  <div id="demoModal" class="modal" hidden>
+    <div class="modal-box">
+      <button id="modalClose" class="modal-close">×</button>
+      <div class="modal-icon">C</div>
+      <h2 id="modalTitle">Notice</h2>
+      <div id="modalContent"></div>
+      <button id="modalOk" class="gold-btn">Continue</button>
+    </div>
   </div>
 
-</div>
-
-<script src="app.js"></script>
-
+  <script src="app.js"></script>
 </body>
 </html>
