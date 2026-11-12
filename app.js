@@ -1,448 +1,533 @@
 
+// ======================================
+// CKET DASHBOARD - APP.JS
+// ======================================
+
 const $ = (id) => document.getElementById(id);
 
-const STORAGE_KEY = "cket_demo_users";
+const STORAGE_KEY = "cket_dashboard_demo_v1";
 
-let mode = "login";
-let currentUser = null;
+const REDEEM_CODE = "201010";
+const REDEEM_REWARD = 100;
+const AD_REWARD = 10;
 
-// ------------------------------
-// USER STORAGE
-// ------------------------------
+const rewards = [
+  { label: "500 CKET", amount: 500 },
+  { label: "200 CKET", amount: 200 },
+  { label: "-70 CKET", amount: -70 },
+  { label: "Better luck", amount: 0 },
+  { label: "10 CKET", amount: 10 },
+  { label: "80 CKET", amount: 80 }
+];
 
-function getUsers() {
+function today() {
+  return new Date().toLocaleDateString("en-CA");
+}
+
+function loadData() {
   try {
-    return JSON.parse(
-      localStorage.getItem(STORAGE_KEY) || "{}"
-    );
-  } catch {
-    return {};
-  }
-}
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
 
-function saveUsers(users) {
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(users)
-  );
-}
-
-function userKey(contact) {
-  return contact.trim().toLowerCase();
-}
-
-// ------------------------------
-// PASSWORD HASHING
-// ------------------------------
-
-async function hashPassword(password) {
-  if (window.crypto && crypto.subtle) {
-    const data = new TextEncoder().encode(password);
-
-    const hash = await crypto.subtle.digest(
-      "SHA-256",
-      data
-    );
-
-    return [...new Uint8Array(hash)]
-      .map(byte => byte.toString(16).padStart(2, "0"))
-      .join("");
+    if (saved && typeof saved.balance === "number") {
+      return {
+        balance: saved.balance,
+        redeemed: saved.redeemed || false,
+        lastSpin: saved.lastSpin || "",
+        lastAd: saved.lastAd || "",
+        activity: Array.isArray(saved.activity)
+          ? saved.activity
+          : []
+      };
+    }
+  } catch (error) {
+    console.error("Could not load CKET data:", error);
   }
 
-  // Local prototype fallback only.
-  let value = 0;
-
-  for (let i = 0; i < password.length; i++) {
-    value = (
-      (value << 5) - value + password.charCodeAt(i)
-    ) | 0;
-  }
-
-  return "fallback-" + Math.abs(value).toString(16);
+  return {
+    balance: 30,
+    redeemed: false,
+    lastSpin: "",
+    lastAd: "",
+    activity: []
+  };
 }
 
-// ------------------------------
-// SECURITY: SAFE TEXT DISPLAY
-// ------------------------------
+let account = loadData();
+let spinning = false;
 
-function escapeHtml(value) {
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
+}
+
+// ======================================
+// BALANCE AND NAIRA CONVERSION
+// ======================================
+
+function naira(amount) {
+  return "₦" + (amount * 100).toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function updateBalance() {
+  const balance = account.balance;
+
+  $("balanceValue").textContent =
+    balance.toLocaleString("en-NG");
+
+  $("nairaBalance").textContent = naira(balance);
+
+  $("overviewBalance").textContent =
+    balance.toLocaleString("en-NG");
+
+  $("overviewNaira").textContent = naira(balance);
+
+  saveData();
+}
+
+// ======================================
+// ACTIVITY HISTORY
+// ======================================
+
+function addActivity(title, amount) {
+  account.activity.unshift({
+    title,
+    amount,
+    date: new Date().toLocaleString()
+  });
+
+  account.activity = account.activity.slice(0, 20);
+
+  saveData();
+  renderActivity();
+}
+
+function renderActivity() {
+  const list = $("activityList");
+
+  if (!account.activity.length) {
+    list.innerHTML =
+      '<p class="empty-state">No transactions yet.</p>';
+    return;
+  }
+
+  list.innerHTML = account.activity.map(item => {
+    const positive = item.amount >= 0;
+    const display = positive
+      ? "+" + item.amount + " CKET"
+      : item.amount + " CKET";
+
+    return `
+      <div class="activity-item">
+        <div>
+          <strong>${escapeHTML(item.title)}</strong>
+          <small>${escapeHTML(item.date)}</small>
+        </div>
+        <span class="${positive ? "positive" : "negative"}">
+          ${display}
+        </span>
+      </div>
+    `;
+  }).join("");
+}
+
+function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, char => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
-    "'": "&#39;"
-  }[char]));
+    "'": "&#039;"
+  })[char]);
 }
 
-// ------------------------------
-// LOGIN / SIGNUP MODE
-// ------------------------------
+// ======================================
+// MODAL SYSTEM
+// ======================================
 
-function setMode(nextMode) {
-  mode = nextMode;
-
-  const signup = mode === "signup";
-
-  $("loginTab").classList.toggle(
-    "active",
-    !signup
-  );
-
-  $("signupTab").classList.toggle(
-    "active",
-    signup
-  );
-
-  $("authTitle").textContent = signup
-    ? "Create your account"
-    : "Welcome back";
-
-  $("authSubtitle").textContent = signup
-    ? "Set up your CKET profile."
-    : "Log in to continue to your CKET dashboard.";
-
-  $("nameLabel").classList.toggle(
-    "hidden",
-    !signup
-  );
-
-  $("nameInput").classList.toggle(
-    "hidden",
-    !signup
-  );
-
-  $("nameInput").required = signup;
-
-  $("authSubmit").textContent = signup
-    ? "Create account"
-    : "Log in";
-
-  $("passwordInput").autocomplete = signup
-    ? "new-password"
-    : "current-password";
-
-  $("authMessage").textContent = "";
+function openModal(title, content) {
+  $("modalTitle").textContent = title;
+  $("modalContent").innerHTML = content;
+  $("demoModal").style.display = "flex";
 }
 
-$("loginTab").addEventListener("click", () => {
-  setMode("login");
-});
+function closeModal() {
+  $("demoModal").style.display = "none";
+}
 
-$("signupTab").addEventListener("click", () => {
-  setMode("signup");
-});
+$("modalClose").addEventListener("click", closeModal);
+$("modalOk").addEventListener("click", closeModal);
 
-// ------------------------------
-// ACTIVITY HISTORY
-// ------------------------------
-
-function addActivity(user, title, amount) {
-  if (!Array.isArray(user.activity)) {
-    user.activity = [];
+$("demoModal").addEventListener("click", (event) => {
+  if (event.target === $("demoModal")) {
+    closeModal();
   }
+});
 
-  user.activity.unshift({
-    title,
-    amount,
-    date: new Date().toISOString()
-  });
+// ======================================
+// DEPOSIT
+// ======================================
 
-  user.activity = user.activity.slice(0, 12);
-}
+$("depositBtn").addEventListener("click", () => {
+  openModal(
+    "Deposit CKET",
+    `
+      <p>Choose a deposit amount to preview the CKET deposit process.</p>
 
-// ------------------------------
-// SAVE CURRENT USER
-// ------------------------------
+      <label>Amount in naira</label>
+      <input type="number" id="depositAmount"
+        placeholder="Enter amount">
 
-function persistCurrentUser() {
-  const users = getUsers();
+      <p>Conversion rate: ₦100 = 1 CKET</p>
 
-  users[userKey(currentUser.contact)] = currentUser;
+      <button class="primary-btn full-btn" id="depositPreview">
+        Preview Deposit
+      </button>
 
-  saveUsers(users);
+      <p id="depositMessage" class="result-message"></p>
+    `
+  );
 
-  renderDashboard();
-}
+  setTimeout(() => {
+    const button = $("depositPreview");
 
-// ------------------------------
-// OPEN DASHBOARD
-// ------------------------------
+    if (!button) return;
 
-function showApp() {
-  $("authView").classList.add("hidden");
-  $("appView").classList.remove("hidden");
+    button.addEventListener("click", () => {
+      const amount = Number($("depositAmount").value);
 
-  $("welcomeTitle").textContent =
-    `Welcome, ${currentUser.name || "there"}`;
+      if (!amount || amount <= 0) {
+        $("depositMessage").textContent =
+          "Enter a valid amount.";
+        return;
+      }
 
-  $("avatar").textContent =
-    (currentUser.name || "C")
-      .trim()
-      .charAt(0)
-      .toUpperCase();
+      $("depositMessage").textContent =
+        "This is a demo. No payment was collected and no CKET was added.";
+    });
+  }, 0);
+});
 
-  renderDashboard();
+// ======================================
+// WITHDRAWAL PREVIEW
+// ======================================
 
-  showPage("home");
-}
+$("withdrawBtn").addEventListener("click", () => {
+  openModal(
+    "Withdraw",
+    `
+      <p>Withdrawal request preview.</p>
 
-// ------------------------------
-// DASHBOARD DISPLAY
-// ------------------------------
+      <p>
+        Your current balance is
+        <strong>${account.balance.toLocaleString()} CKET</strong>.
+      </p>
 
-function renderDashboard() {
-  $("balanceValue").textContent =
-    Number(currentUser.balance || 0)
-      .toLocaleString("en-NG");
+      <label>Withdrawal amount (CKET)</label>
+      <input type="number" id="withdrawAmount"
+        placeholder="Enter CKET amount">
 
-  const activity = Array.isArray(currentUser.activity)
-    ? currentUser.activity
-    : [];
+      <label>Bank selection</label>
+      <select id="withdrawBank">
+        <option value="">Select bank</option>
+        <option>Access Bank</option>
+        <option>GTBank</option>
+        <option>First Bank</option>
+        <option>UBA</option>
+        <option>Zenith Bank</option>
+        <option>OPay</option>
+        <option>Palmpay</option>
+      </select>
 
-  if (activity.length === 0) {
-    $("activityList").innerHTML =
-      '<p class="empty-state">Your activity will appear here.</p>';
+      <p>
+        This prototype does not collect bank account details or
+        send money. A real withdrawal requires a verified payment
+        provider and secure backend.
+      </p>
 
+      <button class="primary-btn full-btn" id="withdrawPreview">
+        Preview Request
+      </button>
+
+      <p id="withdrawMessage" class="result-message"></p>
+    `
+  );
+
+  setTimeout(() => {
+    const button = $("withdrawPreview");
+
+    if (!button) return;
+
+    button.addEventListener("click", () => {
+      const amount = Number($("withdrawAmount").value);
+      const bank = $("withdrawBank").value;
+
+      if (!amount || amount <= 0 || !bank) {
+        $("withdrawMessage").textContent =
+          "Enter an amount and select a bank.";
+        return;
+      }
+
+      if (amount > account.balance) {
+        $("withdrawMessage").textContent =
+          "Insufficient CKET balance.";
+        return;
+      }
+
+      $("withdrawMessage").textContent =
+        "Demo request previewed. No balance was deducted and no transfer was made.";
+    });
+  }, 0);
+});
+
+// ======================================
+// CONVERT
+// ======================================
+
+$("convertBtn").addEventListener("click", () => {
+  openModal(
+    "CKET Conversion",
+    `
+      <p>Your CKET balance is displayed using this conversion rate:</p>
+      <h2 style="color:#f5dfa0">1 CKET = ₦100</h2>
+      <h2 style="color:#f5dfa0">30 CKET = ₦3,000</h2>
+      <p>
+        Your current balance:
+        <strong>${account.balance.toLocaleString()} CKET</strong>
+      </p>
+      <p>
+        Naira equivalent:
+        <strong>${naira(account.balance)}</strong>
+      </p>
+    `
+  );
+});
+
+// ======================================
+// WATCH ADS DEMO
+// ======================================
+
+$("adsBtn").addEventListener("click", () => {
+  if (account.lastAd === today()) {
+    openModal(
+      "Ad Reward",
+      "<p>Your demo ad reward has already been claimed today. Try again tomorrow.</p>"
+    );
     return;
   }
 
-  $("activityList").innerHTML = activity.map(item => `
-    <div class="activity-row">
-      <div>
-        ${escapeHtml(item.title)}
-        <small>
-          ${new Date(item.date).toLocaleString()}
-        </small>
+  openModal(
+    "Watch Ad",
+    `
+      <p>Advertisement preview</p>
+      <div style="
+        background:#292016;
+        padding:35px 15px;
+        text-align:center;
+        border-radius:12px;
+        margin:15px 0;
+      ">
+        <div style="font-size:40px;color:#f5dfa0">▶</div>
+        <h3 style="color:#f5dfa0;margin:10px">
+          CKET AD PREVIEW
+        </h3>
+        <p>Demo advertisement screen</p>
       </div>
+      <p>Demo reward: <strong>10 CKET</strong></p>
+      <button class="primary-btn full-btn" id="claimAd">
+        Claim Demo Reward
+      </button>
+      <p id="adMessage" class="result-message"></p>
+    `
+  );
 
-      <div class="activity-amount">
-        +${Number(item.amount).toLocaleString()} CKET
-      </div>
-    </div>
-  `).join("");
+  setTimeout(() => {
+    const button = $("claimAd");
+
+    if (!button) return;
+
+    button.addEventListener("click", () => {
+      if (account.lastAd === today()) {
+        $("adMessage").textContent =
+          "You have already claimed today's reward.";
+        return;
+      }
+
+      account.balance += AD_REWARD;
+      account.lastAd = today();
+
+      addActivity("Demo ad reward", AD_REWARD);
+      updateBalance();
+
+      button.disabled = true;
+
+      $("adMessage").textContent =
+        "10 CKET demo points added to your balance.";
+    });
+  }, 0);
+});
+
+// ======================================
+// SPIN AND WIN
+// ======================================
+
+function updateSpinStatus() {
+  const alreadySpun = account.lastSpin === today();
+
+  $("spinChances").textContent = alreadySpun ? "0" : "1";
+
+  $("spinBtn").disabled = alreadySpun || spinning;
+
+  $("spinBtn").textContent = alreadySpun
+    ? "COME BACK TOMORROW"
+    : "SPIN NOW";
 }
 
-// ------------------------------
-// PAGE NAVIGATION
-// ------------------------------
+$("spinBtn").addEventListener("click", () => {
+  if (spinning) return;
 
-function showPage(page) {
-  document.querySelectorAll(".page").forEach(section => {
-    section.classList.toggle(
-      "active",
-      section.id === `page-${page}`
-    );
-  });
-
-  document.querySelectorAll("[data-page]").forEach(button => {
-    button.classList.toggle(
-      "active",
-      button.dataset.page === page
-    );
-  });
-}
-
-document.querySelectorAll("[data-page]").forEach(button => {
-  button.addEventListener("click", () => {
-    showPage(button.dataset.page);
-  });
-});
-
-// ------------------------------
-// SIGNUP AND LOGIN
-// ------------------------------
-
-$("authForm").addEventListener("submit", async event => {
-  event.preventDefault();
-
-  const contact = $("contactInput").value.trim();
-  const password = $("passwordInput").value;
-
-  const key = userKey(contact);
-  const users = getUsers();
-
-  const passwordHash = await hashPassword(password);
-
-  if (mode === "signup") {
-    const name = $("nameInput").value.trim();
-
-    if (!name) {
-      $("authMessage").textContent =
-        "Please enter your name.";
-      return;
-    }
-
-    if (password.length < 6) {
-      $("authMessage").textContent =
-        "Use at least 6 characters for your password.";
-      return;
-    }
-
-    if (users[key]) {
-      $("authMessage").textContent =
-        "An account with those details already exists.";
-      return;
-    }
-
-    currentUser = {
-      name,
-      contact,
-      passwordHash,
-      balance: 0,
-      activity: [],
-      claimedDays: [],
-      redeemedCodes: []
-    };
-
-    users[key] = currentUser;
-
-    saveUsers(users);
-
-    showApp();
-
-  } else {
-    const user = users[key];
-
-    if (!user || user.passwordHash !== passwordHash) {
-      $("authMessage").textContent =
-        "Incorrect login details. Please try again.";
-      return;
-    }
-
-    currentUser = user;
-
-    currentUser.balance =
-      Number(currentUser.balance || 0);
-
-    currentUser.activity =
-      Array.isArray(currentUser.activity)
-        ? currentUser.activity
-        : [];
-
-    currentUser.claimedDays =
-      Array.isArray(currentUser.claimedDays)
-        ? currentUser.claimedDays
-        : [];
-
-    currentUser.redeemedCodes =
-      Array.isArray(currentUser.redeemedCodes)
-        ? currentUser.redeemedCodes
-        : [];
-
-    showApp();
-  }
-});
-
-// ------------------------------
-// LOGOUT
-// ------------------------------
-
-$("logoutBtn").addEventListener("click", () => {
-  currentUser = null;
-
-  $("appView").classList.add("hidden");
-  $("authView").classList.remove("hidden");
-
-  $("authForm").reset();
-
-  setMode("login");
-});
-
-// ------------------------------
-// DAILY POINTS
-// ------------------------------
-
-$("dailyClaimBtn").addEventListener("click", () => {
-  const today = new Date()
-    .toISOString()
-    .slice(0, 10);
-
-  currentUser.claimedDays =
-    Array.isArray(currentUser.claimedDays)
-      ? currentUser.claimedDays
-      : [];
-
-  if (currentUser.claimedDays.includes(today)) {
-    $("dailyMessage").textContent =
-      "You've already collected today's points. Come back tomorrow.";
-
+  if (account.lastSpin === today()) {
+    $("spinMessage").textContent =
+      "Your free daily spin has already been used.";
     return;
   }
 
-  currentUser.claimedDays.push(today);
+  spinning = true;
+  $("spinBtn").disabled = true;
+  $("spinMessage").textContent = "Spinning...";
 
-  currentUser.balance =
-    Number(currentUser.balance || 0) + 30;
+  const index = Math.floor(Math.random() * rewards.length);
+  const reward = rewards[index];
 
-  addActivity(
-    currentUser,
-    "Daily check-in",
-    30
-  );
+  const wheel = $("wheel");
 
-  persistCurrentUser();
+  const angle = 360 * 6 + (360 - index * 60 - 30);
 
-  $("dailyMessage").textContent =
-    "30 virtual CKET points added to your balance.";
+  wheel.style.transform = `rotate(${angle}deg)`;
 
-  $("dailyClaimBtn").disabled = true;
+  setTimeout(() => {
+    account.lastSpin = today();
 
-  $("dailyClaimBtn").textContent =
-    "Collected today";
+    if (reward.amount > 0) {
+      account.balance += reward.amount;
+      addActivity("Spin reward", reward.amount);
+
+      $("spinMessage").textContent =
+        `Congratulations! You received ${reward.amount} CKET.`;
+    } else if (reward.amount < 0) {
+      account.balance = Math.max(
+        0,
+        account.balance + reward.amount
+      );
+
+      addActivity("Spin result", reward.amount);
+
+      $("spinMessage").textContent =
+        "Your spin result was -70 CKET.";
+    } else {
+      $("spinMessage").textContent =
+        "Better luck next time!";
+    }
+
+    updateBalance();
+
+    spinning = false;
+    updateSpinStatus();
+
+  }, 4100);
 });
 
-// ------------------------------
+// ======================================
 // REDEEM CODE
-// ------------------------------
+// ======================================
 
 $("redeemBtn").addEventListener("click", () => {
-  const code = $("codeInput")
-    .value
-    .trim()
-    .toUpperCase();
+  const enteredCode = $("codeInput").value.trim();
 
-  currentUser.redeemedCodes =
-    Array.isArray(currentUser.redeemedCodes)
-      ? currentUser.redeemedCodes
-      : [];
-
-  if (code !== "CKETSTART") {
+  if (!enteredCode) {
     $("redeemMessage").textContent =
-      "That code isn't valid.";
-
+      "Please enter a redeem code.";
     return;
   }
 
-  if (currentUser.redeemedCodes.includes(code)) {
+  if (account.redeemed) {
     $("redeemMessage").textContent =
-      "This code has already been used on your account.";
-
+      "This account has already redeemed its available code.";
     return;
   }
 
-  currentUser.redeemedCodes.push(code);
+  if (enteredCode !== REDEEM_CODE) {
+    $("redeemMessage").textContent =
+      "Invalid redeem code.";
+    return;
+  }
 
-  currentUser.balance =
-    Number(currentUser.balance || 0) + 100;
+  account.balance += REDEEM_REWARD;
+  account.redeemed = true;
 
-  addActivity(
-    currentUser,
-    "Redeem code: CKETSTART",
-    100
-  );
-
-  persistCurrentUser();
-
-  $("redeemMessage").textContent =
-    "Success! 100 virtual CKET points added.";
+  addActivity("Redeem reward", REDEEM_REWARD);
+  updateBalance();
 
   $("codeInput").value = "";
+
+  $("redeemMessage").textContent =
+    "Code accepted! 100 CKET added.";
 });
 
-// ------------------------------
-// INITIALIZE
-// ------------------------------
+// ======================================
+// BOTTOM NAVIGATION
+// ======================================
 
-setMode("login");
+const navTargets = {
+  home: ".balance-card",
+  spin: ".spin-panel",
+  redeem: "#codeInput",
+  activity: "#activityList"
+};
 
+document.querySelectorAll(".nav-item").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach(item => {
+      item.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    const target = document.querySelector(
+      navTargets[button.dataset.page]
+    );
+
+    if (target) {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }
+  });
+});
+
+// ======================================
+// PROFILE
+// ======================================
+
+$("profileBtn").addEventListener("click", () => {
+  openModal(
+    "My CKET Account",
+    `
+      <p>Account type: Demo account</p>
+      <p>Balance: ${account.balance.toLocaleString()} CKET</p>
+      <p>Naira equivalent: ${naira(account.balance)}</p>
+      <p>Redemption status: ${account.redeemed ? "Redeemed" : "Not redeemed"}</p>
+    `
+  );
+});
+
+// ======================================
+// INITIALIZE DASHBOARD
+// ======================================
+
+updateBalance();
+renderActivity();
+updateSpinStatus();
+saveData();
