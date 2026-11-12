@@ -1,118 +1,120 @@
 
-/* =========================================
-   CKET DIGITAL WALLET
-   BLACK & GOLD DEMO
-========================================= */
+"use strict";
+
+/* =====================================
+   CKET COMPLETE APPLICATION
+===================================== */
 
 const $ = id => document.getElementById(id);
 
-const STORAGE = "cket_demo_users";
+const DB = "cket_demo_users";
 const SESSION = "cket_current_user";
-
 const RATE = 100;
 
 let currentUser = null;
 let spinning = false;
 
-// =========================================
-// STORAGE
-// =========================================
+const rewards = [
+  { name: "500 CKETS", value: 500 },
+  { name: "200 CKETS", value: 200 },
+  { name: "-70 CKETS", value: -70 },
+  { name: "BETTER LUCK", value: 0 },
+  { name: "10 CKETS", value: 10 },
+  { name: "80 CKETS", value: 80 }
+];
+
+/* =====================================
+   STORAGE
+===================================== */
 
 function getUsers() {
-  return JSON.parse(localStorage.getItem(STORAGE) || "{}");
-}
-
-function saveUsers(users) {
-  localStorage.setItem(STORAGE, JSON.stringify(users));
+  try {
+    return JSON.parse(localStorage.getItem(DB) || "{}");
+  } catch {
+    return {};
+  }
 }
 
 function saveUser() {
-  if (!currentUser) return;
-
   const users = getUsers();
   users[currentUser.email] = currentUser;
-
-  saveUsers(users);
+  localStorage.setItem(DB, JSON.stringify(users));
   localStorage.setItem(SESSION, currentUser.email);
 }
 
-function loadUser() {
-  const email = localStorage.getItem(SESSION);
-  if (!email) return;
+/* =====================================
+   MESSAGES
+===================================== */
 
-  const users = getUsers();
+function showMessage(title, content) {
+  $("modalTitle").textContent = title;
 
-  if (users[email]) {
-    currentUser = users[email];
-    showApp();
-  }
-}
+  const box = $("modalContent");
+  box.replaceChildren();
 
-// =========================================
-// NOTIFICATIONS
-// =========================================
+  const paragraph = document.createElement("p");
+  paragraph.textContent = content;
+  box.appendChild(paragraph);
 
-function message(text, element) {
-  if (element) {
-    element.textContent = text;
-    return;
-  }
-
-  const modal = $("demoModal");
-
-  $("modalTitle").textContent = "CKET Notice";
-  $("modalContent").textContent = text;
-  modal.hidden = false;
+  $("demoModal").hidden = false;
 }
 
 function closeModal() {
   $("demoModal").hidden = true;
 }
 
-$("modalClose").onclick = closeModal;
-$("modalOk").onclick = closeModal;
+$("modalClose").addEventListener("click", closeModal);
+$("modalOk").addEventListener("click", closeModal);
 
-// =========================================
-// AUTH TABS
-// =========================================
+/* =====================================
+   AUTHENTICATION TABS
+===================================== */
 
-$("showLogin").onclick = () => {
+$("showLogin").addEventListener("click", () => {
   $("loginForm").hidden = false;
   $("signupForm").hidden = true;
 
   $("showLogin").classList.add("active");
   $("showSignup").classList.remove("active");
-};
+});
 
-$("showSignup").onclick = () => {
-  $("loginForm").hidden = true;
+$("showSignup").addEventListener("click", () => {
   $("signupForm").hidden = false;
+  $("loginForm").hidden = true;
 
   $("showSignup").classList.add("active");
   $("showLogin").classList.remove("active");
-};
+});
 
-// =========================================
-// SIGN UP
-// =========================================
+/* =====================================
+   SIGN UP
+===================================== */
 
-$("signupForm").addEventListener("submit", e => {
+$("signupForm").addEventListener("submit", function(e) {
   e.preventDefault();
 
   const name = $("signupName").value.trim();
   const email = $("signupEmail").value.trim().toLowerCase();
   const password = $("signupPassword").value;
 
+  if (!name || !email || !password) {
+    return showMessage("Missing details", "Please complete every field.");
+  }
+
+  if (password.length < 6) {
+    return showMessage("Password too short", "Use at least 6 characters.");
+  }
+
   const users = getUsers();
 
   if (users[email]) {
-    return message("This email already has an account.", $("signupMessage"));
+    return showMessage("Account exists", "This email is already registered. Please log in.");
   }
 
   currentUser = {
-    name,
-    email,
-    password,
+    name: name,
+    email: email,
+    password: password,
     balance: 30,
     spinUnlocked: true,
     activity: [],
@@ -121,17 +123,18 @@ $("signupForm").addEventListener("submit", e => {
 
   saveUser();
 
-  $("signupForm").reset();
-  message("Account created successfully!", $("signupMessage"));
+  this.reset();
 
   showApp();
+
+  showMessage("Welcome to CKET!", "Your demo account has been created with 30 CKETS.");
 });
 
-// =========================================
-// LOGIN
-// =========================================
+/* =====================================
+   LOGIN
+===================================== */
 
-$("loginForm").addEventListener("submit", e => {
+$("loginForm").addEventListener("submit", function(e) {
   e.preventDefault();
 
   const email = $("loginEmail").value.trim().toLowerCase();
@@ -140,29 +143,19 @@ $("loginForm").addEventListener("submit", e => {
   const users = getUsers();
 
   if (!users[email] || users[email].password !== password) {
-    return message("Incorrect email or password.", $("loginMessage"));
+    return showMessage("Login failed", "Incorrect email or password.");
   }
 
   currentUser = users[email];
 
-  $("loginForm").reset();
+  this.reset();
 
   showApp();
 });
 
-// =========================================
-// LOGOUT
-// =========================================
-
-$("logoutBtn").onclick = () => {
-  currentUser = null;
-  localStorage.removeItem(SESSION);
-  location.reload();
-};
-
-// =========================================
-// SHOW APPLICATION
-// =========================================
+/* =====================================
+   SHOW APP
+===================================== */
 
 function showApp() {
   $("authView").hidden = true;
@@ -173,9 +166,19 @@ function showApp() {
   updateDashboard();
 }
 
-// =========================================
-// DASHBOARD
-// =========================================
+/* =====================================
+   LOGOUT
+===================================== */
+
+$("logoutBtn").addEventListener("click", () => {
+  currentUser = null;
+  localStorage.removeItem(SESSION);
+  location.reload();
+});
+
+/* =====================================
+   DASHBOARD
+===================================== */
 
 function updateDashboard() {
   if (!currentUser) return;
@@ -189,9 +192,22 @@ function updateDashboard() {
   $("overviewBalance").textContent = balance.toLocaleString();
   $("overviewNaira").textContent = naira.toLocaleString();
 
-  updateSpinDisplay();
+  $("spinChances").textContent =
+    currentUser.spinUnlocked ? "1" : "0";
+
+  $("spinBtn").textContent =
+    currentUser.spinUnlocked
+      ? "SPIN NOW"
+      : "UNLOCK NEXT SPIN - 50 CKETS";
+
+  $("spinBtn").disabled = spinning;
+
   renderActivity();
 }
+
+/* =====================================
+   ACTIVITY
+===================================== */
 
 function addActivity(description, amount) {
   currentUser.activity.unshift({
@@ -205,98 +221,63 @@ function addActivity(description, amount) {
 
 function changeBalance(amount, description) {
   if (currentUser.balance + amount < 0) {
-    message("Insufficient CKETS.");
+    showMessage("Insufficient balance", "You do not have enough CKETS.");
     return false;
   }
 
   currentUser.balance += amount;
-
   addActivity(description, amount);
-
   updateDashboard();
 
   return true;
 }
 
-// =========================================
-// PAGE NAVIGATION
-// =========================================
-
-function openPage(page) {
-  document.querySelectorAll(".page").forEach(section => {
-    section.classList.remove("active");
-  });
-
-  const target = $(page);
-
-  if (target) target.classList.add("active");
-
-  document.querySelectorAll(".nav-btn").forEach(button => {
-    button.classList.toggle(
-      "active",
-      button.dataset.page === page
-    );
-  });
-}
+/* =====================================
+   NAVIGATION
+===================================== */
 
 document.querySelectorAll("[data-page]").forEach(button => {
   button.addEventListener("click", () => {
-    openPage(button.dataset.page);
+    const page = button.dataset.page;
+
+    document.querySelectorAll(".page").forEach(p => {
+      p.classList.remove("active");
+    });
+
+    if ($(page)) $(page).classList.add("active");
+
+    document.querySelectorAll(".nav-btn").forEach(nav => {
+      nav.classList.toggle("active", nav.dataset.page === page);
+    });
   });
 });
 
-// =========================================
-// SPIN & WIN
-// =========================================
+/* =====================================
+   SPIN & WIN
+===================================== */
 
-const rewards = [
-  { name: "500 CKETS", value: 500 },
-  { name: "200 CKETS", value: 200 },
-  { name: "-70 CKETS", value: -70 },
-  { name: "BETTER LUCK", value: 0 },
-  { name: "10 CKETS", value: 10 },
-  { name: "80 CKETS", value: 80 }
-];
-
-function updateSpinDisplay() {
-  $("spinChances").textContent =
-    currentUser.spinUnlocked ? "1" : "0";
-
-  $("spinBtn").textContent =
-    currentUser.spinUnlocked
-      ? "SPIN NOW"
-      : "UNLOCK NEXT SPIN - 50 CKETS";
-
-  $("spinBtn").disabled = spinning;
-}
-
-$("spinBtn").onclick = () => {
+$("spinBtn").addEventListener("click", () => {
   if (!currentUser || spinning) return;
 
-  // Unlock another spin
+  // Unlock another spin for 50 CKETS
   if (!currentUser.spinUnlocked) {
     if (currentUser.balance < 50) {
-      return message("You need 50 CKETS to unlock another spin.");
+      return showMessage("Insufficient CKETS", "You need 50 CKETS to unlock another spin.");
     }
 
     currentUser.balance -= 50;
     currentUser.spinUnlocked = true;
 
-    addActivity("Spin unlocked", -50);
-
+    addActivity("Unlocked another spin", -50);
     updateDashboard();
 
-    message("New spin unlocked! You can spin again.");
-
-    return;
+    return showMessage("Spin unlocked!", "Your next spin is ready.");
   }
 
-  // Start spin
   spinning = true;
   currentUser.spinUnlocked = false;
 
   const wheel = $("wheel");
-
   const index = Math.floor(Math.random() * rewards.length);
   const reward = rewards[index];
 
@@ -305,113 +286,141 @@ $("spinBtn").onclick = () => {
   wheel.style.transition = "transform 4s ease-out";
   wheel.style.transform = `rotate(${rotation}deg)`;
 
-  updateSpinDisplay();
+  updateDashboard();
 
   setTimeout(() => {
     spinning = false;
 
-    if (reward.value !== 0) {
-      currentUser.balance += reward.value;
+    currentUser.balance += reward.value;
 
-      addActivity("Spin reward: " + reward.name, reward.value);
-    } else {
-      addActivity("Spin reward: Better luck next time", 0);
-    }
+    addActivity("Spin reward: " + reward.name, reward.value);
 
     updateDashboard();
 
-    message(
-      reward.value > 0
-        ? "Congratulations! You won " + reward.name + "!"
-        : reward.value < 0
-          ? "You landed on -70 CKETS."
-          : "Better luck next time!"
-    );
+    if (reward.value > 0) {
+      showMessage("Congratulations!", "You won " + reward.name + "!");
+    } else if (reward.value < 0) {
+      showMessage("Spin result", "You landed on -70 CKETS.");
+    } else {
+      showMessage("Better luck next time!", "Try again by unlocking another spin for 50 CKETS.");
+    }
 
   }, 4100);
-};
+});
 
-// =========================================
-// EARN CKET DEMO
-// =========================================
+/* =====================================
+   REDEEM CODES
+===================================== */
 
-$("adsBtn").onclick = () => {
-  message(
-    "Demo reward only. No advertisement was actually watched."
-  );
-};
-
-// =========================================
-// REDEEM CODE
-// =========================================
-
-const redeemRewards = {
+const codes = {
   "CKET50": 50,
   "CKET100": 100,
   "WELCOME": 20,
   "GOLD200": 200
 };
 
-$("redeemBtn").onclick = () => {
+$("redeemBtn").addEventListener("click", () => {
   const code = $("codeInput").value.trim().toUpperCase();
 
   if (!code) {
-    return message("Enter a redeem code.", $("redeemMessage"));
+    return showMessage("Empty code", "Please enter a redeem code.");
   }
 
   if (currentUser.redeemCodes.includes(code)) {
-    return message("This code has already been used.", $("redeemMessage"));
+    return showMessage("Already used", "This code has already been redeemed.");
   }
 
-  const reward = redeemRewards[code];
-
-  if (!reward) {
-    return message("Invalid redeem code.", $("redeemMessage"));
+  if (!codes[code]) {
+    return showMessage("Invalid code", "This redeem code is not valid.");
   }
 
   currentUser.redeemCodes.push(code);
-  currentUser.balance += reward;
+  currentUser.balance += codes[code];
 
-  addActivity("Redeem code reward", reward);
+  addActivity("Redeemed " + code, codes[code]);
 
   $("codeInput").value = "";
 
   updateDashboard();
 
-  message(reward + " CKETS successfully added!");
-};
+  showMessage("Successful!", codes[code] + " CKETS added to your demo balance.");
+});
 
-// =========================================
-// WITHDRAWAL
-// =========================================
+/* =====================================
+   EARN CKETS
+===================================== */
 
-function withdrawalForm() {
+$("adsBtn").addEventListener("click", () => {
+  showMessage("Demo feature", "Advertisement rewards are not connected yet.");
+});
+
+/* =====================================
+   DEPOSIT
+===================================== */
+
+$("depositBtn").addEventListener("click", () => {
+  showMessage("Deposit", "Deposits are not available in this demo.");
+});
+
+/* =====================================
+   CONVERT
+===================================== */
+
+$("convertBtn").addEventListener("click", () => {
+  showMessage("Conversion rate", "1 CKET = ₦100. 30 CKETS = ₦3,000.");
+});
+
+/* =====================================
+   WITHDRAWAL FORM
+===================================== */
+
+$("withdrawBtn").addEventListener("click", () => {
   $("modalTitle").textContent = "Withdraw CKETS";
 
-  $("modalContent").innerHTML = `
-    <p>Available balance: <strong id="availableNaira"></strong></p>
+  const box = $("modalContent");
+  box.replaceChildren();
 
-    <input id="accountName" placeholder="Account name">
-    <input id="accountNumber" placeholder="Account number" maxlength="10" inputmode="numeric">
-    <input id="bankName" placeholder="Bank name">
-    <input id="withdrawAmount" type="number" min="100" placeholder="Amount in Naira">
+  const balance = document.createElement("p");
+  balance.textContent =
+    "Available: ₦" + (currentUser.balance * RATE).toLocaleString();
 
-    <p style="font-size:11px;color:#aaa">
-      This is a simulated demo withdrawal. No real transfer occurs.
-    </p>
+  const name = document.createElement("input");
+  name.placeholder = "Account name";
+  name.id = "accountName";
 
-    <button id="confirmWithdrawal" class="gold-btn">
-      Proceed to Withdraw
-    </button>
-  `;
+  const account = document.createElement("input");
+  account.placeholder = "Account number";
+  account.id = "accountNumber";
+  account.maxLength = 10;
+  account.inputMode = "numeric";
 
-  $("availableNaira").textContent =
-    "₦" + (currentUser.balance * RATE).toLocaleString();
+  const bank = document.createElement("input");
+  bank.placeholder = "Bank name";
+  bank.id = "bankName";
 
-  $("confirmWithdrawal").onclick = processWithdrawal;
+  const amount = document.createElement("input");
+  amount.placeholder = "Withdrawal amount (₦)";
+  amount.type = "number";
+  amount.min = "100";
+  amount.id = "withdrawAmount";
+
+  const note = document.createElement("small");
+  note.textContent = "Demo only. No real bank transfer will occur.";
+
+  const button = document.createElement("button");
+  button.className = "gold-btn";
+  button.textContent = "Proceed to Withdraw";
+
+  box.append(balance, name, account, bank, amount, note, button);
+
+  button.addEventListener("click", processWithdrawal);
 
   $("demoModal").hidden = false;
-}
+});
+
+/* =====================================
+   PROCESS WITHDRAWAL
+===================================== */
 
 function processWithdrawal() {
   const name = $("accountName").value.trim();
@@ -420,92 +429,98 @@ function processWithdrawal() {
   const amount = Number($("withdrawAmount").value);
 
   if (!name || !account || !bank || !amount) {
-    return message("Please fill in all withdrawal details.");
+    return showMessage("Missing details", "Please fill in all fields.");
   }
 
   if (!/^\d{10}$/.test(account)) {
-    return message("Enter a valid 10-digit account number.");
+    return showMessage("Invalid account", "Enter a 10-digit account number.");
   }
 
   if (!Number.isInteger(amount) || amount < 100 || amount % 100 !== 0) {
-    return message("Enter a valid amount in multiples of ₦100.");
+    return showMessage("Invalid amount", "Use amounts in multiples of ₦100.");
   }
 
-  const cketCost = amount / RATE;
+  const cost = amount / RATE;
 
-  if (cketCost > currentUser.balance) {
-    return message("Insufficient CKET balance.");
+  if (cost > currentUser.balance) {
+    return showMessage("Insufficient balance", "You do not have enough CKETS.");
   }
 
-  currentUser.balance -= cketCost;
+  currentUser.balance -= cost;
 
-  addActivity("Demo withdrawal - " + bank, -cketCost);
+  addActivity("Demo withdrawal - " + bank, -cost);
 
   updateDashboard();
 
   $("modalTitle").textContent = "Withdrawal Sent!";
 
-  $("modalContent").textContent =
-    "Your demo withdrawal request has been recorded successfully. No real bank transfer was made.";
+  const box = $("modalContent");
+  box.replaceChildren();
 
-  $("modalOk").textContent = "Done";
+  const result = document.createElement("p");
+  result.textContent =
+    "Your demo withdrawal request for ₦" +
+    amount.toLocaleString() +
+    " has been recorded. No real bank transfer was made.";
 
-  $("modalOk").onclick = () => {
-    closeModal();
-    $("modalOk").onclick = closeModal;
-    $("modalOk").textContent = "Continue";
-  };
+  box.appendChild(result);
+
+  const ok = $("modalOk");
+  ok.onclick = closeModal;
 }
 
-// =========================================
-// DEPOSIT & CONVERT DEMO
-// =========================================
-
-$("depositBtn").onclick = () => {
-  message("Deposits are currently unavailable in this demo.");
-};
-
-$("convertBtn").onclick = () => {
-  message("Conversion rate: 1 CKET = ₦100.");
-};
-
-// =========================================
-// ACTIVITY
-// =========================================
+/* =====================================
+   RENDER ACTIVITY
+===================================== */
 
 function renderActivity() {
   const list = $("activityList");
-
-  list.innerHTML = "";
+  list.replaceChildren();
 
   if (!currentUser.activity.length) {
-    list.innerHTML = '<p class="empty-message">No activity yet.</p>';
+    const empty = document.createElement("p");
+    empty.className = "empty-message";
+    empty.textContent = "No activity yet.";
+    list.appendChild(empty);
     return;
   }
 
   currentUser.activity.forEach(item => {
     const row = document.createElement("div");
-
     row.className = "activity-item";
 
     const title = document.createElement("strong");
     title.textContent = item.description;
 
-    const amount = document.createElement("p");
-    amount.textContent =
+    const value = document.createElement("p");
+    value.textContent =
       (item.amount > 0 ? "+" : "") + item.amount + " CKETS";
 
     const date = document.createElement("small");
     date.textContent = item.date;
 
-    row.append(title, amount, date);
-
+    row.append(title, value, date);
     list.appendChild(row);
   });
 }
 
-// =========================================
-// START
-// =========================================
+/* =====================================
+   RESTORE LOGIN SESSION
+===================================== */
 
-loadUser();
+function startApp() {
+  const email = localStorage.getItem(SESSION);
+
+  if (!email) return;
+
+  const users = getUsers();
+
+  if (users[email]) {
+    currentUser = users[email];
+    showApp();
+  } else {
+    localStorage.removeItem(SESSION);
+  }
+}
+
+startApp();
