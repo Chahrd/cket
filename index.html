@@ -1,124 +1,391 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#090909">
-  <title>CKET — Your Digital Points Hub</title>
+  <title>CKET - Digital Points Hub</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <!-- LOGIN AND SIGNUP -->
   <div class="auth-shell" id="authView">
+
     <div class="brand-mark">C<span>KET</span></div>
     <p class="eyebrow">YOUR DIGITAL POINTS HUB</p>
+
     <section class="auth-card">
+
       <div class="auth-tabs">
-        <button class="tab active" id="loginTab" type="button">Log in</button>
-        <button class="tab" id="signupTab" type="button">Create account</button>
+        <button class="tab active" id="loginTab" type="button">
+          Log in
+        </button>
+
+        <button class="tab" id="signupTab" type="button">
+          Create account
+        </button>
       </div>
+
       <h1 id="authTitle">Welcome back</h1>
-      <p class="muted" id="authSubtitle">Log in to continue to your CKET dashboard.</p>
+
+      <p class="muted" id="authSubtitle">
+        Log in to continue to your CKET dashboard.
+      </p>
+
       <form id="authForm">
-        <label id="nameLabel" class="hidden" for="nameInput">Full name</label>
-        <input id="nameInput" class="hidden" type="text" placeholder="Your full name" autocomplete="name">
-        <label for="contactInput">Email or username</label>
-        <input id="contactInput" type="text" placeholder="Enter email or username" autocomplete="username" required>
-        <label for="passwordInput">Password</label>
-        <input id="passwordInput" type="password" placeholder="Enter password" autocomplete="current-password" minlength="6" required>
-        <button class="primary-btn full" id="authSubmit" type="submit">Log in</button>
+
+        <label id="nameLabel" class="hidden" for="nameInput">
+          Full name
+        </label>
+
+        <input
+          id="nameInput"
+          class="hidden"
+          type="text"
+          placeholder="Your full name"
+          autocomplete="name"
+        >
+
+        <label for="contactInput">
+          Email or username
+        </label>
+
+        <input
+          id="contactInput"
+          type="text"
+          placeholder="Enter email or username"
+          autocomplete="username"
+          required
+        >
+
+        <label for="passwordInput">
+          Password
+        </label>
+
+        <input
+          id="passwordInput"
+          type="password"
+          placeholder="Enter password"
+          autocomplete="current-password"
+          minlength="6"
+          required
+        >
+
+        <button
+          class="primary-btn full"
+          id="authSubmit"
+          type="submit"
+        >
+          Log in
+        </button>
+
       </form>
-      <p class="form-message" id="authMessage" aria-live="polite"></p>
-      <p class="tiny-note">Prototype account data is stored only in this browser on this device.</p>
+
+      <p class="form-message" id="authMessage"></p>
+
+      <p class="tiny-note">
+        Your prototype account is stored in this browser on this device.
+      </p>
+
     </section>
-    <p class="footer-note">CKET is a virtual-points prototype. Points are not cash.</p>
+
+    <p class="footer-note">
+      CKET virtual points are not cash.
+    </p>
+
   </div>
 
+
+  <!-- MAIN APPLICATION -->
   <div class="app-shell hidden" id="appView">
+
+    <!-- SIDEBAR -->
     <aside class="sidebar">
+
       <div class="brand-mark">C<span>KET</span></div>
+
       <nav>
-        <button class="nav-link active" data-page="home">⌂ <span>Dashboard</span></button>
-        <button class="nav-link" data-page="market">↗ <span>Market</span></button>
-        <button class="nav-link" data-page="spin">◉ <span>Daily activity</span></button>
-        <button class="nav-link" data-page="redeem">◇ <span>Redeem code</span></button>
+
+        <button class="nav-link active" data-page="home" type="button">
+          <span class="nav-icon">⌂</span>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-link" data-page="market" type="button">
+          <span class="nav-icon">↗</span>
+          <span>Market</span>
+        </button>
+
+        <button class="nav-link" data-page="spin" type="button">
+          <span class="nav-icon">◉</span>
+          <span>Daily activity</span>
+        </button>
+
+        <button class="nav-link" data-page="redeem" type="button">
+          <span class="nav-icon">◇</span>
+          <span>Redeem code</span>
+        </button>
+
       </nav>
-      <button class="nav-link logout" id="logoutBtn">↪ <span>Log out</span></button>
+
+      <button class="nav-link logout" id="logoutBtn" type="button">
+        <span class="nav-icon">↪</span>
+        <span>Log out</span>
+      </button>
+
     </aside>
 
+
+    <!-- MAIN CONTENT -->
     <main class="main-content">
+
       <header class="topbar">
+
         <div>
           <p class="eyebrow">CKET OVERVIEW</p>
           <h1 id="welcomeTitle">Welcome</h1>
         </div>
+
         <div class="avatar" id="avatar">C</div>
+
       </header>
 
+
+      <!-- DASHBOARD PAGE -->
       <section class="page active" id="page-home">
+
         <div class="hero-card">
+
           <div>
             <p class="eyebrow">YOUR POINTS BALANCE</p>
-            <div class="balance-line"><strong id="balanceValue">0</strong><span>CKET</span></div>
+
+            <div class="balance-line">
+              <strong id="balanceValue">0</strong>
+              <span>CKET</span>
+            </div>
+
             <p class="muted">Virtual points balance</p>
           </div>
+
           <div class="coin-art">C</div>
+
           <div class="balance-actions">
-            <button class="outline-btn" data-page="redeem">Redeem code</button>
-            <button class="outline-btn" data-page="market">Explore market</button>
+
+            <button class="outline-btn" data-page="redeem" type="button">
+              Redeem code
+            </button>
+
+            <button class="outline-btn" data-page="market" type="button">
+              Explore market
+            </button>
+
           </div>
+
         </div>
+
 
         <div class="notice">
           <strong>Points, not money.</strong>
-          <span>CKET points have no cash value and cannot be deposited, withdrawn, transferred or exchanged for money.</span>
+
+          <span>
+            CKET points have no cash value. They cannot be deposited,
+            withdrawn, transferred or exchanged for money.
+          </span>
         </div>
 
-        <div class="section-heading"><div><p class="eyebrow">QUICK ACCESS</p><h2>Your activities</h2></div></div>
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">QUICK ACCESS</p>
+            <h2>Your activities</h2>
+          </div>
+        </div>
+
+
         <div class="quick-grid">
-          <button class="quick-card" data-page="market"><span class="quick-icon">↗</span><strong>Market</strong><small>View simulated prices</small></button>
-          <button class="quick-card" data-page="spin"><span class="quick-icon">◉</span><strong>Daily activity</strong><small>Collect a fixed daily bonus</small></button>
-          <button class="quick-card" data-page="redeem"><span class="quick-icon">◇</span><strong>Redeem</strong><small>Enter a points code</small></button>
+
+          <button class="quick-card" data-page="market" type="button">
+            <span class="quick-icon">↗</span>
+            <strong>Market</strong>
+            <small>View simulated prices</small>
+          </button>
+
+          <button class="quick-card" data-page="spin" type="button">
+            <span class="quick-icon">◉</span>
+            <strong>Daily activity</strong>
+            <small>Collect your daily points</small>
+          </button>
+
+          <button class="quick-card" data-page="redeem" type="button">
+            <span class="quick-icon">◇</span>
+            <strong>Redeem</strong>
+            <small>Enter a points code</small>
+          </button>
+
         </div>
 
-        <div class="section-heading"><div><p class="eyebrow">RECENT UPDATES</p><h2>Activity history</h2></div></div>
-        <div class="activity-card" id="activityList"><p class="empty-state">Your activity will appear here.</p></div>
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">RECENT UPDATES</p>
+            <h2>Activity history</h2>
+          </div>
+        </div>
+
+
+        <div class="activity-card" id="activityList">
+          <p class="empty-state">
+            Your activity will appear here.
+          </p>
+        </div>
+
       </section>
 
+
+      <!-- MARKET PAGE -->
       <section class="page" id="page-market">
-        <div class="page-heading"><p class="eyebrow">SIMULATED MARKET</p><h2>Market overview</h2><p class="muted">Illustrative sample values only. This is not a real exchange or investment product.</p></div>
+
+        <div class="page-heading">
+          <p class="eyebrow">SIMULATED MARKET</p>
+
+          <h2>Market overview</h2>
+
+          <p class="muted">
+            Illustrative sample values only. This is not a real exchange
+            or investment product.
+          </p>
+        </div>
+
+
         <div class="market-grid">
-          <article class="market-card"><span class="market-symbol">₿</span><p>Bitcoin (sample)</p><strong>₦98,450,000</strong><small class="positive">+2.4% today</small></article>
-          <article class="market-card"><span class="market-symbol">Ξ</span><p>Ethereum (sample)</p><strong>₦5,240,000</strong><small class="positive">+1.1% today</small></article>
-          <article class="market-card"><span class="market-symbol">$</span><p>USD (sample)</p><strong>₦1,500</strong><small class="negative">−0.3% today</small></article>
+
+          <article class="market-card">
+            <span class="market-symbol">₿</span>
+            <p>Bitcoin (sample)</p>
+            <strong>₦98,450,000</strong>
+            <small class="positive">+2.4% today</small>
+          </article>
+
+          <article class="market-card">
+            <span class="market-symbol">Ξ</span>
+            <p>Ethereum (sample)</p>
+            <strong>₦5,240,000</strong>
+            <small class="positive">+1.1% today</small>
+          </article>
+
+          <article class="market-card">
+            <span class="market-symbol">$</span>
+            <p>USD (sample)</p>
+            <strong>₦1,500</strong>
+            <small class="negative">−0.3% today</small>
+          </article>
+
         </div>
-        <div class="notice"><strong>Learning simulation</strong><span>Prices are made-up examples for the interface. No buying, selling, trading or profit is possible here.</span></div>
+
+
+        <div class="notice">
+          <strong>Learning simulation</strong>
+
+          <span>
+            These are sample figures for the interface. No buying,
+            selling, trading or profit is possible here.
+          </span>
+        </div>
+
       </section>
 
+
+      <!-- DAILY ACTIVITY PAGE -->
       <section class="page" id="page-spin">
-        <div class="page-heading"><p class="eyebrow">DAILY ACTIVITY</p><h2>Your daily points</h2><p class="muted">A transparent, fixed bonus — no paid spins or random prizes.</p></div>
+
+        <div class="page-heading">
+          <p class="eyebrow">DAILY ACTIVITY</p>
+
+          <h2>Your daily points</h2>
+
+          <p class="muted">
+            A transparent, fixed daily bonus. No paid spins or random prizes.
+          </p>
+        </div>
+
+
         <div class="daily-card">
+
           <div class="daily-orb">+30</div>
+
           <h3>Daily check-in</h3>
-          <p class="muted">Collect 30 virtual CKET points once per calendar day.</p>
-          <button class="primary-btn" id="dailyClaimBtn">Collect 30 CKET</button>
-          <p class="form-message" id="dailyMessage" aria-live="polite"></p>
+
+          <p class="muted">
+            Collect 30 virtual CKET points once per calendar day.
+          </p>
+
+          <button class="primary-btn" id="dailyClaimBtn" type="button">
+            Collect 30 CKET
+          </button>
+
+          <p class="form-message" id="dailyMessage"></p>
+
         </div>
+
       </section>
 
+
+      <!-- REDEEM PAGE -->
       <section class="page" id="page-redeem">
-        <div class="page-heading"><p class="eyebrow">POINTS REDEMPTION</p><h2>Redeem a code</h2><p class="muted">Enter a valid CKET points code to add virtual points to your account.</p></div>
-        <div class="redeem-card">
-          <label for="codeInput">Your redeem code</label>
-          <input id="codeInput" type="text" placeholder="Enter code" autocomplete="off">
-          <button class="primary-btn full" id="redeemBtn">Apply code</button>
-          <p class="form-message" id="redeemMessage" aria-live="polite"></p>
-          <p class="tiny-note">Demo code: <strong>CKETSTART</strong> — adds 100 virtual points once per account.</p>
+
+        <div class="page-heading">
+          <p class="eyebrow">POINTS REDEMPTION</p>
+
+          <h2>Redeem a code</h2>
+
+          <p class="muted">
+            Enter a valid CKET points code to add virtual points.
+          </p>
         </div>
+
+
+        <div class="redeem-card">
+
+          <label for="codeInput">
+            Your redeem code
+          </label>
+
+          <input
+            id="codeInput"
+            type="text"
+            placeholder="Enter code"
+            autocomplete="off"
+          >
+
+          <button class="primary-btn full" id="redeemBtn" type="button">
+            Apply code
+          </button>
+
+          <p class="form-message" id="redeemMessage"></p>
+
+          <p class="tiny-note">
+            Demo code: <strong>CKETSTART</strong> — adds 100 virtual
+            points once per account.
+          </p>
+
+        </div>
+
       </section>
 
-      <footer class="app-footer">© 2026 CKET · Virtual points prototype · No cash value</footer>
+
+      <footer class="app-footer">
+        © 2026 CKET · Virtual points prototype · No cash value
+      </footer>
+
     </main>
+
   </div>
+
+
+  <!-- JAVASCRIPT -->
   <script src="app.js"></script>
+
 </body>
 </html>
